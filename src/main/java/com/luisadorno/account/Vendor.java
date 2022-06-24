@@ -32,24 +32,15 @@ public class Vendor extends Account{
         return inventory;
     }
 
-    public void setInventory(Map<Product, Integer> inventory) {
-        this.inventory = inventory;
+    public void addProductToInventory(Product product){
     }
 
     public Product[] getShowcase() {
         return showcase;
     }
 
-    public void setShowcase(Product[] showcase) {
-        this.showcase = showcase;
-    }
-
     public List<Order> getOrders() {
         return orders;
-    }
-
-    public void setOrders(List<Order> orders) {
-        this.orders = orders;
     }
 
     @Override
