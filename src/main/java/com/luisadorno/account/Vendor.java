@@ -32,7 +32,26 @@ public class Vendor extends Account{
         return inventory;
     }
 
-    public void addProductToInventory(Product product){
+    public Boolean addProductToInventory(Product product){
+        if(product == null) return false;
+        if(isInInventory(product)) {
+            inventory.put(product, inventory.get(product)+1);
+            return true;
+        }
+        inventory.put(product, 1);
+        return true;
+    }
+
+    public Boolean removeProductFromInventory(Product product){
+        if(isInInventory(product)) {
+            inventory.remove(product);
+            return true;
+        }
+        return false;
+    }
+
+    private Boolean isInInventory(Product product){
+        return inventory.containsKey(product);
     }
 
     public Product[] getShowcase() {
