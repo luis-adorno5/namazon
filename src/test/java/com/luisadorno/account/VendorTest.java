@@ -1,5 +1,8 @@
 package com.luisadorno.account;
 
+import com.luisadorno.address.Address;
+import com.luisadorno.order.Order;
+import com.luisadorno.order.OrderStatus;
 import com.luisadorno.product.Product;
 import com.luisadorno.product.ProductCategory;
 import org.junit.jupiter.api.Assertions;
@@ -11,6 +14,7 @@ public class VendorTest {
 
     private Vendor vendor;
     private Product product;
+    private Address address;
 
     @BeforeEach
     void setUp() {
@@ -19,7 +23,7 @@ public class VendorTest {
                 "12345");
         product = new Product("Playstation",
                 ProductCategory.ELECTRONICS, 499.99);
-
+        address = new Address();
     }
 
     @Test
@@ -58,6 +62,34 @@ public class VendorTest {
     public void removeProductFromInventoryTest02() {
         Boolean actual = vendor.removeProductFromInventory(product);
         Assertions.assertFalse(actual);
+    }
+
+    @Test
+    @DisplayName("Have a customer purchase a product.")
+    public void placeAnOrderMethodTest01() {
+        vendor.addProductToInventory(product);
+        vendor.placeAnOrder(product, address);
+        int expected = 1;
+        int actual = vendor.getOrders().size();
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("Cancel an order that has not shipped.")
+    public void cancelOrder01(){
+        vendor.addProductToInventory(product);
+        Order order = vendor.placeAnOrder(product, address);
+        Boolean actual = vendor.cancelOrder(order);
+        Assertions.assertTrue(actual);
+    }
+
+    @Test
+    @DisplayName("Add product to specified position in showcase.")
+    public void addProductToShowcaseTest(){
+        vendor.addProductToShowcase(product, 0);
+        String expected = "Playstation ELECTRONICS 499.99";
+        String actual = vendor.getShowcase()[0].toString();
+        Assertions.assertEquals(expected, actual);
     }
 
 }
