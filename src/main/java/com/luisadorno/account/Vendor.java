@@ -19,7 +19,6 @@ public class Vendor extends Account{
         this.brandName = brandName;
         this.inventory = new HashMap<>();
         this.showcase = new Product[5];
-        this.orders = new ArrayList<>();
     }
 
     public String getBrandName() {

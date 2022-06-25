@@ -23,7 +23,8 @@ public class VendorTest {
                 "12345");
         product = new Product("Playstation",
                 ProductCategory.ELECTRONICS, 499.99);
-        address = new Address();
+        address = new Address("94 Elm Street", "35",
+                "San Juan", "Puerto Rico");
     }
 
     @Test
