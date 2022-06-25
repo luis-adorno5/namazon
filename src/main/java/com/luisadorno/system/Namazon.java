@@ -4,6 +4,8 @@ import com.luisadorno.account.Account;
 import com.luisadorno.account.Customer;
 import com.luisadorno.account.Vendor;
 import com.luisadorno.exceptions.AccountCreationException;
+import com.luisadorno.product.Product;
+import com.luisadorno.product.ProductCategory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +26,7 @@ public class Namazon {
     public void start() throws AccountCreationException {
         Account account = null;
         boolean sessionOn = true;
+        boolean signedIn = true;
         while (sessionOn){
             int choice = signInSignUpDisplay();
             switch (choice) {
@@ -34,13 +37,77 @@ public class Namazon {
                 case 4 -> sessionOn = false;
                 default -> System.out.println("You did not input a valid option.\n");
             }
-            if(account instanceof Vendor)
-                System.out.println("You are signed in as a vendor");
-            else if(account instanceof Customer)
-                System.out.println("You signed in as a Customer.");
+            if(account instanceof Vendor){
+                while (signedIn){
+                    switch (vendorMenu()){
+                        case 0 -> addProductToInventory((Vendor) account);
+                        case 1 -> changeShowcase((Vendor) account);
+                        case 2 -> signedIn = false;
+                    }
+                }
+            }
+            else if(account instanceof Customer) {
+                Vendor vendor = selectVendor();
+            }
             else
                 System.out.println("You do not have a valid account!");
         }
+    }
+
+    private Integer vendorMenu(){
+        System.out.println("What would you like to do?");
+        System.out.println("0) Add a product to inventory");
+        System.out.println("1) Add a product to showcase");
+        System.out.println("2) Sign out");
+        return Integer.parseInt(scanner.nextLine());
+    }
+
+    private Product addProductToInventory(Vendor vendor){
+        boolean addingProducts = true;
+        Product product = new Product("", ProductCategory.ELECTRONICS, 0.00);
+        while (addingProducts){
+            System.out.println("What type of product would you like to add?");
+            System.out.println("0) "+ ProductCategory.ELECTRONICS);
+            System.out.println("1) "+ ProductCategory.ATHLETICS);
+            System.out.println("2) "+ ProductCategory.CLOTHING);
+            System.out.println("3) "+ ProductCategory.HOME_APPLIANCE);
+            System.out.println("4) Stop adding products");
+            int choice = Integer.parseInt(scanner.nextLine());
+            switch(choice){
+                case 0 -> product = createProduct(ProductCategory.ELECTRONICS, vendor);
+                case 1 -> product = createProduct(ProductCategory.ATHLETICS, vendor);
+                case 2 -> product = createProduct(ProductCategory.CLOTHING, vendor);
+                case 3 -> product = createProduct(ProductCategory.HOME_APPLIANCE, vendor);
+                case 4 -> addingProducts = false;
+            }
+        }
+        return product;
+    }
+
+    private Product createProduct(ProductCategory category, Vendor vendor){
+        System.out.println("Enter the name of the product: ");
+        String name = scanner.nextLine();
+        System.out.println("Enter the product price: ");
+        double price = Double.parseDouble(scanner.nextLine());
+        Product newProduct = new Product(name, category, price);
+        vendor.addProductToInventory(newProduct);
+        System.out.println("Added product to inventory.\n");
+        return newProduct;
+    }
+
+    private Product changeShowcase(Vendor vendor){
+        if(vendor.getInventory().size() == 0) return null;
+        int i = 0;
+        System.out.println("Which product would you like to display in the showcase: ");
+        for (Product product : vendor.getInventory().keySet()){
+            System.out.println(i + ") " + product.toString());
+        }
+        int choice = Integer.parseInt(scanner.nextLine());
+        Product product = (Product) vendor.getInventory().keySet().toArray()[0];
+        System.out.println("Which showcase spot from 1-5 would you like to place the product?");
+        int showcaseIndex = Integer.parseInt(scanner.nextLine());
+        vendor.getShowcase()[showcaseIndex] = product;
+        return product;
     }
 
     public Customer signInAsCustomer(){
@@ -70,7 +137,9 @@ public class Namazon {
     }
 
     private Vendor createVendorWithInformation(String firstName, String lastName, String brandName, String email, String password){
-        return new Vendor(brandName, firstName, lastName, email, password);
+        Vendor vendor = new Vendor(brandName, firstName, lastName, email, password);
+        vendors.add(vendor);
+        return vendor;
     }
 
     public Customer signUpAsCustomer() throws AccountCreationException {
