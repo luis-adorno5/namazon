@@ -5,9 +5,11 @@ import com.luisadorno.account.Customer;
 import com.luisadorno.account.Vendor;
 import com.luisadorno.address.Address;
 import com.luisadorno.exceptions.AccountCreationException;
+import com.luisadorno.order.Order;
 import com.luisadorno.product.Product;
 import com.luisadorno.product.ProductCategory;
 
+import java.awt.color.ProfileDataException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -50,7 +52,14 @@ public class Namazon {
                 }
             }
             else if(account instanceof Customer) {
-                Vendor vendor = selectVendor();
+                while (signedIn){
+                    Vendor vendor = selectVendor();
+                    switch (customerMenu()){
+                        case 0 -> purchase(vendor, ((Customer) account));
+                        case 1 -> listCustomersOngoingOrders((Customer) account);
+                        case 2 -> signedIn = false;
+                    }
+                }
             }
             else if(choice == 4){
                 System.out.println("Goodbye we hope to see you again!");
@@ -66,6 +75,21 @@ public class Namazon {
         System.out.println("1) Add a product to showcase");
         System.out.println("2) Sign out");
         return Integer.parseInt(scanner.nextLine());
+    }
+
+    private Integer customerMenu(){
+        System.out.println("What would you like to do?");
+        System.out.println("0) Buy a product");
+        System.out.println("1) List current orders");
+        System.out.println("2) Sign out");
+        return Integer.parseInt(scanner.nextLine());
+    }
+
+    private Order listCustomersOngoingOrders(Customer customer){
+        for(Order order : customer.getOrders()){
+            System.out.println(order.toString());
+        }
+        return null;
     }
 
     private Product addProductToInventory(Vendor vendor){
@@ -195,6 +219,31 @@ public class Namazon {
         return new Address(street, unit, city, state);
     }
 
+    private Order purchase(Vendor vendor, Customer customer){
+        boolean purchasing = true;
+        int i = 0;
+        Order order = null;
+        while (purchasing){
+            System.out.println("The available products are: ");
+            for (Product product : vendor.getInventory().keySet()){
+                System.out.println(i+") " + product.toString());
+                i++;
+            }
+            System.out.println(i+") Stop purchasing");
+            System.out.println("Which product would you like to purchase?");
+            int choice = Integer.parseInt(scanner.nextLine());
+            if(choice == i) purchasing = false;
+            else if(choice < 0 || choice > vendors.size()) System.out.println("You did not select a valid option.");
+            else {
+                Product product = ((Product) vendor.getInventory().keySet().toArray()[choice]);
+                order = vendor.placeAnOrder(product, customer.getAddress());
+                customer.getOrders().add(order);
+                System.out.println("You have successfully purchased a " + product.toString());
+            }
+        }
+        return order;
+    }
+
     private Boolean isEmailValid(String email){
         Pattern pattern = Pattern.compile("^(.+)@(.+)$");
         return pattern.matcher(email).matches();
@@ -205,7 +254,22 @@ public class Namazon {
     }
 
     public Vendor selectVendor(){
-        return null;
+        int i = 0;
+        int choice = -1;
+        boolean notChosen = true;
+        while(notChosen) {
+            System.out.println("Which vendor would you like to choose?");
+            for (Vendor vendor : vendors) {
+                System.out.println(i + ") " + vendor.getBrandName());
+                i++;
+            }
+            choice = Integer.parseInt(scanner.nextLine());
+            if(choice < 0 || choice > vendors.size())
+                System.out.println("You did not select a valid option.");
+            else
+                notChosen = false;
+        }
+        return vendors.get(choice);
     }
 
     private Integer signInSignUpDisplay(){
