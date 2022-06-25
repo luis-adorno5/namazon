@@ -45,4 +45,9 @@ public class Address {
     public void setState(String state) {
         this.state = state;
     }
+
+    public String toString(){
+        return String.format("%s %s %s %s", street, unit, city, state);
+    }
+
 }

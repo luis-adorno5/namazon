@@ -46,4 +46,8 @@ public class Order {
     public void setStatus(OrderStatus status) {
         this.status = status;
     }
+
+    public String toString(){
+        return String.format("%s %s %s %s", id, product.toString(), destination.toString(), status);
+    }
 }
