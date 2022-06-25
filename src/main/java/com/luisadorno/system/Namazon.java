@@ -3,6 +3,7 @@ package com.luisadorno.system;
 import com.luisadorno.account.Account;
 import com.luisadorno.account.Customer;
 import com.luisadorno.account.Vendor;
+import com.luisadorno.address.Address;
 import com.luisadorno.exceptions.AccountCreationException;
 import com.luisadorno.product.Product;
 import com.luisadorno.product.ProductCategory;
@@ -24,10 +25,12 @@ public class Namazon {
     }
 
     public void start() throws AccountCreationException {
-        Account account = null;
+        Account account;
         boolean sessionOn = true;
-        boolean signedIn = true;
+        boolean signedIn;
         while (sessionOn){
+            account = null;
+            signedIn = true;
             int choice = signInSignUpDisplay();
             switch (choice) {
                 case 0 -> account = signInAsCustomer();
@@ -48,6 +51,9 @@ public class Namazon {
             }
             else if(account instanceof Customer) {
                 Vendor vendor = selectVendor();
+            }
+            else if(choice == 4){
+                System.out.println("Goodbye we hope to see you again!");
             }
             else
                 System.out.println("You do not have a valid account!");
@@ -110,14 +116,34 @@ public class Namazon {
         return product;
     }
 
-    public Customer signInAsCustomer(){
+    private Customer signInAsCustomer(){
         System.out.println("You chose sign in as customer.");
         return null;
     }
 
-    public Vendor signInAsVendor(){
-        System.out.println("You chose sign in as vendor.");
+    private Vendor signInAsVendor(){
+        System.out.println("Enter your email: ");
+        String email = scanner.nextLine();
+        if(!isEmailRegistered(email)){
+            System.out.println("The email you entered is not registered!");
+            return null;
+        }
+        System.out.println("Enter your password: ");
+        String password = scanner.nextLine();
+        if(isCorrectPasswordForAccount(email, password)){
+            for(Vendor vendor : vendors){
+                if(vendor.getEmail().equals(email)) return vendor;
+            }
+        }
         return null;
+    }
+
+    private Boolean isCorrectPasswordForAccount(String email, String password){
+        for (Vendor vendor : vendors){
+            if(vendor.getEmail().equals(email) && vendor.getPassword().equals(password))
+                return true;
+        }
+        return false;
     }
 
     public Vendor signUpAsVendor() throws AccountCreationException {
@@ -151,9 +177,22 @@ public class Namazon {
         String email = scanner.nextLine();
         System.out.println("Enter your password: ");
         String password = scanner.nextLine();
+        Address address = enterAddressInformation();
         if(isEmailValid(email) && !isEmailRegistered(email))
-            return new Customer(firstName, lastName, email, password);
+            return new Customer(firstName, lastName, email, password, address);
         throw new AccountCreationException();
+    }
+
+    private Address enterAddressInformation(){
+        System.out.println("Enter your street: ");
+        String street = scanner.nextLine();
+        System.out.println("Enter your unit: ");
+        String unit = scanner.nextLine();
+        System.out.println("Enter your city: ");
+        String city = scanner.nextLine();
+        System.out.println("Enter your state: ");
+        String state = scanner.nextLine();
+        return new Address(street, unit, city, state);
     }
 
     private Boolean isEmailValid(String email){
