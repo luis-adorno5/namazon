@@ -9,7 +9,6 @@ import com.luisadorno.order.Order;
 import com.luisadorno.product.Product;
 import com.luisadorno.product.ProductCategory;
 
-import java.awt.color.ProfileDataException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -141,20 +140,32 @@ public class Namazon {
     }
 
     private Customer signInAsCustomer(){
-        System.out.println("You chose sign in as customer.");
+        System.out.println("Enter your email: ");
+        String email = scanner.nextLine();
+        if(!isCustomerEmailRegistered(email)){
+            System.out.println("The email you entered is not registered!");
+            return null;
+        }
+        System.out.println("Enter your password: ");
+        String password = scanner.nextLine();
+        if(isCorrectPasswordForCustomerAccount(email, password)){
+            for(Customer customer : customers){
+                if(customer.getEmail().equals(email)) return customer;
+            }
+        }
         return null;
     }
 
     private Vendor signInAsVendor(){
         System.out.println("Enter your email: ");
         String email = scanner.nextLine();
-        if(!isEmailRegistered(email)){
+        if(!isVendorEmailRegistered(email)){
             System.out.println("The email you entered is not registered!");
             return null;
         }
         System.out.println("Enter your password: ");
         String password = scanner.nextLine();
-        if(isCorrectPasswordForAccount(email, password)){
+        if(isCorrectPasswordForVendorAccount(email, password)){
             for(Vendor vendor : vendors){
                 if(vendor.getEmail().equals(email)) return vendor;
             }
@@ -162,9 +173,17 @@ public class Namazon {
         return null;
     }
 
-    private Boolean isCorrectPasswordForAccount(String email, String password){
+    private Boolean isCorrectPasswordForVendorAccount(String email, String password){
         for (Vendor vendor : vendors){
             if(vendor.getEmail().equals(email) && vendor.getPassword().equals(password))
+                return true;
+        }
+        return false;
+    }
+
+    private Boolean isCorrectPasswordForCustomerAccount(String email, String password){
+        for (Customer customer : customers){
+            if(customer.getEmail().equals(email) && customer.getPassword().equals(password))
                 return true;
         }
         return false;
@@ -181,7 +200,7 @@ public class Namazon {
         String email = scanner.nextLine();
         System.out.println("Enter your password: ");
         String password = scanner.nextLine();
-        if(isEmailValid(email) && !isEmailRegistered(email))
+        if(isEmailValid(email) && !isVendorEmailRegistered(email))
             return createVendorWithInformation(firstName, lastName, brandName, email, password);
         throw new AccountCreationException();
     }
@@ -202,8 +221,11 @@ public class Namazon {
         System.out.println("Enter your password: ");
         String password = scanner.nextLine();
         Address address = enterAddressInformation();
-        if(isEmailValid(email) && !isEmailRegistered(email))
-            return new Customer(firstName, lastName, email, password, address);
+        if(isEmailValid(email) && !isCustomerEmailRegistered(email)) {
+            Customer customer = new Customer(firstName, lastName, email, password, address);
+            customers.add(customer);
+            return customer;
+        }
         throw new AccountCreationException();
     }
 
@@ -238,7 +260,7 @@ public class Namazon {
                 Product product = ((Product) vendor.getInventory().keySet().toArray()[choice]);
                 order = vendor.placeAnOrder(product, customer.getAddress());
                 customer.getOrders().add(order);
-                System.out.println("You have successfully purchased a " + product.toString());
+                System.out.println("You have successfully purchased a " + product.toString()+"\n");
             }
         }
         return order;
@@ -249,8 +271,12 @@ public class Namazon {
         return pattern.matcher(email).matches();
     }
 
-    private Boolean isEmailRegistered(String email){
+    private Boolean isVendorEmailRegistered(String email){
         return vendors.stream().anyMatch(vendor -> vendor.getEmail().equals(email));
+    }
+
+    private Boolean isCustomerEmailRegistered(String email){
+        return customers.stream().anyMatch(customer -> customer.getEmail().equals(email));
     }
 
     public Vendor selectVendor(){
