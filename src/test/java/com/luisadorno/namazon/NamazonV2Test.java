@@ -3,8 +3,10 @@ package com.luisadorno.namazon;
 import com.luisadorno.account.Account;
 import com.luisadorno.account.Customer;
 import com.luisadorno.address.Address;
+import com.luisadorno.exceptions.InvalidEmailException;
 import com.luisadorno.exceptions.UserCredentialsInvalidException;
 import com.luisadorno.exceptions.UserDoesNotExistException;
+import com.luisadorno.exceptions.UserExistsException;
 import com.luisadorno.system.Namazon;
 import com.luisadorno.system.NamazonV2;
 import org.junit.jupiter.api.Assertions;
@@ -59,4 +61,33 @@ public class NamazonV2Test {
             Account account = namazonV2.signIn(email, "fds");
         });
     }
+
+    @Test
+    @DisplayName("Sign up test - Successful account creation")
+    public void signUpTest01() throws UserExistsException, InvalidEmailException {
+        NamazonV2 namazonV2 = new NamazonV2();
+        String expected = email;
+        String actual = namazonV2.signUp("Luis", "Adorno",
+                email, password, address).getEmail();
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("Sign up test - Fails, InvalidEmailException")
+    public void signUpTest02(){
+        Assertions.assertThrows(InvalidEmailException.class, () -> {
+            NamazonV2 namazonV2 = new NamazonV2();
+            namazonV2.signUp("Luis", "Adorno", "as", password, address);
+        });
+    }
+
+    @Test
+    @DisplayName("Sign up test - Fails, UserExistsException")
+    public void signUpTest03(){
+        Assertions.assertThrows(UserExistsException.class, () -> {
+            NamazonV2 namazonV2 = new NamazonV2(accounts);
+            namazonV2.signUp("Luis", "Adorno", email, password, address);
+        });
+    }
+
 }

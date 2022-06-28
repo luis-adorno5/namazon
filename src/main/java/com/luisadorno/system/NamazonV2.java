@@ -1,12 +1,17 @@
 package com.luisadorno.system;
 
 import com.luisadorno.account.Account;
+import com.luisadorno.account.Customer;
+import com.luisadorno.address.Address;
+import com.luisadorno.exceptions.InvalidEmailException;
 import com.luisadorno.exceptions.UserCredentialsInvalidException;
 import com.luisadorno.exceptions.UserDoesNotExistException;
+import com.luisadorno.exceptions.UserExistsException;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 public class NamazonV2 {
 
@@ -25,7 +30,7 @@ public class NamazonV2 {
     }
 
     public void run(){
-        Boolean flag = false;
+        Boolean flag = true;
         while (flag){
             if(currentAccount == null)
                 flag = welcomeScreen();
@@ -43,21 +48,19 @@ public class NamazonV2 {
         Boolean flag = true;
         String output = """
                 Welcome to Namazon. What would you like to do?
-                0) Sign in as customer
-                1) Sign in as vendor
-                2) Sign up as customer
-                3) Sign up as vendor
-                4) Exit""";
+                0) Sign in
+                1) Sign up as customer
+                2) Sign up as vendor
+                3) Exit""";
         System.out.println(output);
         String selection = scanner.nextLine();
         switch(selection){
             case "0" -> attemptSignIn();
             case "1" -> attemptSignUpAsCustomer();
             case "2" -> attemptSignUpAsVendor();
-            case "3"-> {}
+            case "3" -> flag = false;
             default -> {
-                System.out.println("Goodbye!");
-                flag = false;
+                System.out.println("You did not select a valid option!");
             }
         }
         return flag;
@@ -88,15 +91,62 @@ public class NamazonV2 {
         return account;
     }
 
-    private void attemptSignUpAsCustomer(){}
+    public Account signUp(String firstName, String lastName, String email, String password, Address address) throws UserExistsException, InvalidEmailException{
+        if(!isValidEmail(email))
+            throw new InvalidEmailException();
+        if(accounts.containsKey(email))
+            throw new UserExistsException();
+        Account account = new Customer(firstName, lastName, email,
+                password, address);
+        accounts.put(email, account);
+        return account;
+    }
+
+    private void attemptSignUpAsCustomer(){
+        try {
+            System.out.println("Enter your first name: ");
+            String firstName = scanner.nextLine();
+            System.out.println("Enter your last name: ");
+            String lastName = scanner.nextLine();
+            System.out.println("Enter a valid email:");
+            String email = scanner.nextLine();
+            System.out.println("Enter a valid password:");
+            String password = scanner.nextLine();
+            Address address = collectAddressInformation();
+            currentAccount = signUp(firstName, lastName, email, password, address);
+        }catch (UserExistsException e){
+            System.out.println("A user with the provided email already exists.");
+        }catch (InvalidEmailException e){
+            System.out.println("The email you entered is not valid!");
+        }
+    }
 
     private void attemptSignUpAsVendor(){}
+
+    private Address collectAddressInformation(){
+        System.out.println("Enter your street:");
+        String street = scanner.nextLine();
+        System.out.println("Enter your unit:");
+        String unit = scanner.nextLine();
+        System.out.println("Enter your city:");
+        String city = scanner.nextLine();
+        System.out.println("Enter your state:");
+        String state = scanner.nextLine();
+        return new Address(street, unit, city, state);
+    }
+
+    private Boolean isValidEmail(String email){
+        Pattern pattern = Pattern.compile("^(.+)@(.+)$");
+        return pattern.matcher(email).matches();
+    }
 
     private Boolean validatePassword(Account account, String password){
         return account.getPassword().equals(password);
     }
 
     public static void main(String[] args) {
+        NamazonV2 namazonV2 = new NamazonV2();
+        namazonV2.run();
     }
 
 }
