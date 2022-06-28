@@ -91,6 +91,21 @@ public class Vendor extends Account{
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Vendor vendor = (Vendor) o;
+        return Objects.equals(brandName, vendor.brandName) && Objects.equals(inventory, vendor.inventory) && Arrays.equals(showcase, vendor.showcase) && Objects.equals(orders, vendor.orders);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(brandName, inventory, orders);
+        result = 31 * result + Arrays.hashCode(showcase);
+        return result;
+    }
+
+    @Override
     public String toString() {
         return brandName;
     }

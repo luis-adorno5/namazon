@@ -5,6 +5,7 @@ import com.luisadorno.order.Order;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Customer extends Account{
 
@@ -36,5 +37,18 @@ public class Customer extends Account{
 
     public void setAddress(Address address) {
         this.address = address;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Customer customer = (Customer) o;
+        return Objects.equals(money, customer.money) && Objects.equals(orders, customer.orders) && Objects.equals(address, customer.address);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(money, orders, address);
     }
 }
