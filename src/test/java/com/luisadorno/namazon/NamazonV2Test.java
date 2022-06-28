@@ -15,7 +15,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class NamazonV2Test {
@@ -23,6 +25,7 @@ public class NamazonV2Test {
     private String email;
     private String password;
     private Account account;
+    private Account account2;
     private Address address;
 
     @BeforeEach
@@ -33,7 +36,10 @@ public class NamazonV2Test {
         address = new Address("DF", "SD2", "DFG", "RE");
         account = new Customer("Luis", "Adorno",
                 email, password, address);
+        account2 = new Vendor("Chulito", "Luis", "Adorno",
+                "chulito@fakemail.com", "1234");
         accounts.put(email, account);
+        accounts.put("chulito@fakemail.com", account2);
     }
 
 
@@ -115,6 +121,23 @@ public class NamazonV2Test {
         Account actual = namazonV2.signUp("Chulitos", "Luis",
                 "Adorno", email, password);
         Assertions.assertInstanceOf(Vendor.class, actual);
+    }
+
+    @Test
+    @DisplayName("Customer get vendors test.")
+    public void customerGetVendorTest01(){
+        NamazonV2 namazonV2 = new NamazonV2(accounts);
+        int expected = 1;
+        int actual = namazonV2.getVendors().size();
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("Get selected vendor test.")
+    public void customerGetSelectedVendorTest01(){
+        NamazonV2 namazonV2 = new NamazonV2(accounts);
+        Vendor actual = namazonV2.getSelectedVendor(namazonV2.getVendors(), 0);
+        Assertions.assertEquals(account2, actual);
     }
 
 }
