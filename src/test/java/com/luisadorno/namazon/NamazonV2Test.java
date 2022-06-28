@@ -2,6 +2,7 @@ package com.luisadorno.namazon;
 
 import com.luisadorno.account.Account;
 import com.luisadorno.account.Customer;
+import com.luisadorno.account.Vendor;
 import com.luisadorno.address.Address;
 import com.luisadorno.exceptions.InvalidEmailException;
 import com.luisadorno.exceptions.UserCredentialsInvalidException;
@@ -64,7 +65,7 @@ public class NamazonV2Test {
 
     @Test
     @DisplayName("Sign up test - Successful account creation")
-    public void signUpTest01() throws UserExistsException, InvalidEmailException {
+    public void customerSignUpTest01() throws UserExistsException, InvalidEmailException {
         NamazonV2 namazonV2 = new NamazonV2();
         String expected = email;
         String actual = namazonV2.signUp("Luis", "Adorno",
@@ -74,7 +75,7 @@ public class NamazonV2Test {
 
     @Test
     @DisplayName("Sign up test - Fails, InvalidEmailException")
-    public void signUpTest02(){
+    public void customerSignUpTest02(){
         Assertions.assertThrows(InvalidEmailException.class, () -> {
             NamazonV2 namazonV2 = new NamazonV2();
             namazonV2.signUp("Luis", "Adorno", "as", password, address);
@@ -83,11 +84,37 @@ public class NamazonV2Test {
 
     @Test
     @DisplayName("Sign up test - Fails, UserExistsException")
-    public void signUpTest03(){
+    public void customerSignUpTest03(){
         Assertions.assertThrows(UserExistsException.class, () -> {
             NamazonV2 namazonV2 = new NamazonV2(accounts);
             namazonV2.signUp("Luis", "Adorno", email, password, address);
         });
+    }
+
+    @Test
+    @DisplayName("Sign up test - Ensure account is instance of customer")
+    public void customerSignUpTest04() throws UserExistsException, InvalidEmailException {
+        NamazonV2 namazonV2 = new NamazonV2();
+        Account accountActual = namazonV2.signUp("Luis" ,"Adorno", email, password, address);
+        Assertions.assertInstanceOf(Customer.class, accountActual);
+    }
+
+    @Test
+    @DisplayName("Vendor sign up - Successful")
+    public void vendorSignUpTest01() throws UserExistsException, InvalidEmailException {
+        NamazonV2 namazonV2 = new NamazonV2();
+        String actual = namazonV2.signUp("Chulitos", "Luis",
+                "Adorno", email, password).getEmail();
+        Assertions.assertEquals(email, actual);
+    }
+
+    @Test
+    @DisplayName("Vendor sign up - Ensure is instanceOf Vendor")
+    public void vendorSignUpTest02() throws UserExistsException, InvalidEmailException {
+        NamazonV2 namazonV2 = new NamazonV2();
+        Account actual = namazonV2.signUp("Chulitos", "Luis",
+                "Adorno", email, password);
+        Assertions.assertInstanceOf(Vendor.class, actual);
     }
 
 }

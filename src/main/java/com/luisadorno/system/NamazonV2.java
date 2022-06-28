@@ -2,6 +2,7 @@ package com.luisadorno.system;
 
 import com.luisadorno.account.Account;
 import com.luisadorno.account.Customer;
+import com.luisadorno.account.Vendor;
 import com.luisadorno.address.Address;
 import com.luisadorno.exceptions.InvalidEmailException;
 import com.luisadorno.exceptions.UserCredentialsInvalidException;
@@ -35,13 +36,13 @@ public class NamazonV2 {
             if(currentAccount == null)
                 flag = welcomeScreen();
             else{
-                accountOptionsScreen();
+                try {
+                    flag = identifyAccountRole();
+                }catch (Exception e){
+                    System.out.println("Invalid account.");
+                }
             }
         }
-    }
-
-    private Boolean accountOptionsScreen(){
-        return null;
     }
 
     private Boolean welcomeScreen(){
@@ -102,6 +103,17 @@ public class NamazonV2 {
         return account;
     }
 
+    public Account signUp(String brandName, String firstName, String lastName, String email, String password) throws UserExistsException, InvalidEmailException{
+        if(!isValidEmail(email))
+            throw new InvalidEmailException();
+        if(accounts.containsKey(email))
+            throw new UserExistsException();
+        Account account = new Vendor(brandName, firstName, lastName, email,
+                password);
+        accounts.put(email, account);
+        return account;
+    }
+
     private void attemptSignUpAsCustomer(){
         try {
             System.out.println("Enter your first name: ");
@@ -121,7 +133,25 @@ public class NamazonV2 {
         }
     }
 
-    private void attemptSignUpAsVendor(){}
+    private void attemptSignUpAsVendor(){
+        try {
+            System.out.println("Enter your brand name: ");
+            String brandName = scanner.nextLine();
+            System.out.println("Enter your first name: ");
+            String firstName = scanner.nextLine();
+            System.out.println("Enter your last name: ");
+            String lastName = scanner.nextLine();
+            System.out.println("Enter a valid email:");
+            String email = scanner.nextLine();
+            System.out.println("Enter a valid password:");
+            String password = scanner.nextLine();
+            currentAccount = signUp(brandName, firstName, lastName, email, password);
+        }catch (InvalidEmailException e){
+            System.out.println("The email you entered is not valid!");
+        }catch (UserExistsException e){
+            System.out.println("A user with the provided email already exists.");
+        }
+    }
 
     private Address collectAddressInformation(){
         System.out.println("Enter your street:");
@@ -133,6 +163,23 @@ public class NamazonV2 {
         System.out.println("Enter your state:");
         String state = scanner.nextLine();
         return new Address(street, unit, city, state);
+    }
+
+    private Boolean identifyAccountRole() throws Exception {
+        if(currentAccount.getClass() == Customer.class)
+            return customerOptionsScreen();
+        else if(currentAccount.getClass() == Vendor.class)
+            return vendorOptionsScreen();
+        throw new Exception();
+
+    }
+
+    private Boolean customerOptionsScreen(){
+        return null;
+    }
+
+    private Boolean vendorOptionsScreen(){
+        return null;
     }
 
     private Boolean isValidEmail(String email){
