@@ -268,7 +268,7 @@ public class NamazonV2 {
         String selection = scanner.nextLine();
         switch(selection){
             case "0" -> displayInventoryCreation();
-            case "1" -> {return true;}
+            case "1" -> displayShowcaseOptions();
             case "2" -> displayOrders();
             default -> {currentAccount = null; return false;}
         }
@@ -291,13 +291,68 @@ public class NamazonV2 {
         String productName = scanner.nextLine();
         System.out.println("Enter product price: ");
         double productPrice = Double.parseDouble(scanner.nextLine());
-        createProduct(productName, category, productPrice);
+        Product product = createProduct(productName, category, productPrice);
+        System.out.println(String.format("You have successfully added %s to inventory!\n", product.toString()));
     }
 
     public Product createProduct(String name, ProductCategory category, Double price){
         Product product = new Product(name, category, price);
         ((Vendor) currentAccount).addProductToInventory(product);
         return product;
+    }
+
+    private void displayShowcaseOptions(){
+        System.out.println("These are the items currently in your showcase: ");
+        for (Product product : ((Vendor) currentAccount).getShowcase()) {
+            if (product != null)
+                System.out.println(product.toString());
+        }
+        System.out.println();
+        System.out.println("Do you want to change a slot in the showcase?\n"
+        + "0) Yes\n" + "1) No");
+        int choice = Integer.parseInt(scanner.nextLine());
+        if(choice == 0)
+            changeShowcase();
+        else
+            System.out.println("You decided not to change the showcase.");
+
+    }
+
+    private Boolean changeShowcase(){
+        System.out.println("Which showcase slot from 1-5 would you like to change?");
+        int slot = Integer.parseInt(scanner.nextLine());
+        if(slot < 1 || slot > 5) {
+            System.out.println("You decided not to change a showcase slot");
+            return false;
+        }
+        else if(((Vendor) currentAccount).getInventory().isEmpty()) {
+            System.out.println("You do not have a product to showcase");
+            return false;
+        }
+        else {
+            getProductToShowcase();
+            return true;
+        }
+    }
+
+    private Product getProductToShowcase(){
+        int i = 0;
+        Product productToShowcase = null;
+        System.out.println("Which product would you like to showcase?");
+        for (Product product : ((Vendor) currentAccount).getInventory().keySet()){
+            System.out.println(i+") " + product.toString());
+            i++;
+        }
+        int choice = Integer.parseInt(scanner.nextLine());
+        if(choice < 0 || choice > i) {
+            System.out.println("You decided not to add a product to showcase");
+            return null;
+        }
+        else {
+            productToShowcase = (Product) ((Vendor) currentAccount).getInventory().keySet().toArray()[choice];
+            ((Vendor) currentAccount).getShowcase()[choice] = productToShowcase;
+            return productToShowcase;
+        }
     }
 
     private void displayOrders(){
